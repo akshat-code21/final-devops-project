@@ -4,4 +4,6 @@ ingress:
   host: taskboard.local
 hpa:
   enabled: false
-
+monitoring:
+  serviceMonitor:
+    enabled: false

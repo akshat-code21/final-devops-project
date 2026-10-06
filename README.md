@@ -343,7 +343,7 @@ Terraform automates cloud infrastructure provisioning on Amazon Web Services (AW
 2. **Amazon EKS Cluster (`module.eks`):**
    - Kubernetes version: `1.31`
    - Public endpoint enabled for `kubectl` administration.
-   - EKS Managed Node Group: `t3.medium` instances, min 2, desired 2, max 4 nodes.
+   - EKS Managed Node Group: `t3.micro` instances, min 2, desired 2, max 4 nodes.
    - IAM Roles and OIDC provider enabled.
 
 ### Terraform Execution Steps
