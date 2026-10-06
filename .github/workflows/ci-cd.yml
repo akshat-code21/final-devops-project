@@ -58,7 +58,7 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
           docker push ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && secrets.KUBE_CONFIG_DATA != ''
     needs: build-scan-push
     runs-on: ubuntu-latest
     permissions: {contents: read, packages: read}
