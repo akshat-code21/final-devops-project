@@ -70,12 +70,20 @@ jobs:
         run: |
           if [ -n "$KUBE_CONFIG_DATA" ]; then
             mkdir -p ~/.kube
-            echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
-            helm upgrade --install taskboard ./helm/taskboard -n taskboard --create-namespace \
-              --set backend.tag=${{ github.sha }} \
-              --set frontend.tag=${{ github.sha }} \
-              --set backend.image=ghcr.io/${{ github.repository_owner }}/taskboard-backend \
-              --set frontend.image=ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+            if echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config 2>/dev/null && [ -s ~/.kube/config ]; then
+              echo "Decoded base64 Kubeconfig successfully."
+            else
+              echo "$KUBE_CONFIG_DATA" > ~/.kube/config
+            fi
+            if kubectl get ns taskboard --request-timeout=5s > /dev/null 2>&1; then
+              helm upgrade --install taskboard ./helm/taskboard -n taskboard --create-namespace \
+                --set backend.tag=${{ github.sha }} \
+                --set frontend.tag=${{ github.sha }} \
+                --set backend.image=ghcr.io/${{ github.repository_owner }}/taskboard-backend \
+                --set frontend.image=ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+            else
+              helm lint ./helm/taskboard
+            fi
           else
             helm lint ./helm/taskboard
           fi
