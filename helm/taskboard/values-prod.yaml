@@ -1,10 +1,11 @@
 frontend:
-  image: ghcr.io/YOUR_ORG/taskboard-frontend
+  image: ghcr.io/akshat-code21/taskboard-frontend
 backend:
-  image: ghcr.io/YOUR_ORG/taskboard-backend
+  image: ghcr.io/akshat-code21/taskboard-backend
 replicaCount: 2
 ingress:
   enabled: true
-  host: taskboard.example.com
+  host: taskboard.local
 hpa:
   enabled: true
+

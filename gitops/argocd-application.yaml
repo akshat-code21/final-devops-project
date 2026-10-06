@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-username/final-devops-project.git
+    repoURL: https://github.com/akshat-code21/final-devops-project.git
     targetRevision: HEAD
     path: helm/taskboard
     helm:
