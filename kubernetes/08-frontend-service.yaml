@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-frontend
+  namespace: taskboard
+  labels:
+    app: taskboard-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: taskboard-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http

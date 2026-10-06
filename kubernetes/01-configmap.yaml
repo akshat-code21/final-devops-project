@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskboard-backend-config
+  namespace: taskboard
+data:
+  APP_NAME: "TaskBoard Capstone"
+  ENVIRONMENT: "production"
+  DB_HOST: "taskboard-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "taskboard"

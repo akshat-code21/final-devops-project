@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scenario2-crashloop-db
+  namespace: taskboard
+  labels:
+    troubleshooting: scenario2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scenario2-crashloop-db
+  template:
+    metadata:
+      labels:
+        app: scenario2-crashloop-db
+    spec:
+      containers:
+        - name: app
+          image: python:3.12-slim
+          command:
+            - "sh"
+            - "-c"
+            - "echo 'Connecting to DB at postgres-broken-host:5432...'; sleep 2; echo 'CRITICAL: Host postgres-broken-host not found!'; exit 1"
+          ports:
+            - containerPort: 8000

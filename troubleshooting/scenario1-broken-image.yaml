@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scenario1-broken-image
+  namespace: taskboard
+  labels:
+    troubleshooting: scenario1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scenario1-broken-image
+  template:
+    metadata:
+      labels:
+        app: scenario1-broken-image
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/devops-capstone/taskboard-backend:v99.9.9-nonexistent
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000

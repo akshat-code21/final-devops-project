@@ -1,0 +1,7 @@
+# AWS Infrastructure Configuration Example
+# Copy this file to terraform.tfvars and fill in your values
+# WARNING: NEVER commit your actual terraform.tfvars or AWS credentials to version control!
+
+aws_region   = "ap-south-1"
+cluster_name = "taskboard-eks"
+environment  = "dev"
