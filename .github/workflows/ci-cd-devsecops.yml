@@ -115,7 +115,7 @@ jobs:
           docker build -t ${{ env.IMAGE_FRONTEND }}:${{ github.sha }} ./frontend
 
       - name: Scan Backend Container Image with Trivy
-        uses: aquasecurity/trivy-action@v0.30.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
           format: 'table'
@@ -125,7 +125,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Scan Frontend Container Image with Trivy
-        uses: aquasecurity/trivy-action@v0.30.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
           format: 'table'
