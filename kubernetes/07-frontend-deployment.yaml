@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/your-org/taskboard-frontend:v1.0.0
+          image: ghcr.io/akshat-code21/taskboard-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
