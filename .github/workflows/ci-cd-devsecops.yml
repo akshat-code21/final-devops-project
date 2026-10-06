@@ -1,0 +1,209 @@
+name: End-to-End CI/CD & DevSecOps Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/taskboard-backend
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+
+jobs:
+  # =========================================================================
+  # STAGE 1: Automated Unit Testing & Artifact Build
+  # =========================================================================
+  test:
+    name: Build & Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Backend Dependencies
+        working-directory: application/backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Pytest Suite
+        working-directory: application/backend
+        run: |
+          pytest -v --tb=short
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: application/frontend/package.json
+
+      - name: Install & Build React Frontend
+        working-directory: application/frontend
+        run: |
+          npm ci
+          npm run build
+
+  # =========================================================================
+  # STAGE 2: DevSecOps Scans (SAST, SCA, Secret Scanning)
+  # =========================================================================
+  security-scans:
+    name: DevSecOps Checks (SAST, SCA, Secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret Scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: SAST - Static Application Security Testing (Bandit)
+        run: |
+          pip install bandit
+          bandit -r application/backend/app -ll -ii
+
+      - name: SCA - Software Composition Analysis (pip-audit)
+        run: |
+          pip install pip-audit
+          pip-audit -r application/backend/requirements.txt
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: SCA - Frontend Dependency Audit (npm audit)
+        working-directory: application/frontend
+        run: |
+          npm audit --audit-level=high || true
+
+  # =========================================================================
+  # STAGE 3: Container Build & Image Vulnerability Scanning (Security Gate)
+  # =========================================================================
+  container-security-gate:
+    name: Docker Build & Vulnerability Scan Gate
+    needs: [test, security-scans]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t ${{ env.IMAGE_BACKEND }}:${{ github.sha }} ./application/backend
+
+      - name: Build Frontend Docker Image
+        run: |
+          docker build -t ${{ env.IMAGE_FRONTEND }}:${{ github.sha }} ./application/frontend
+
+      - name: Scan Backend Container Image with Trivy
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan Frontend Container Image with Trivy
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  # =========================================================================
+  # STAGE 4: Registry Push (Only after Security Gate Passes)
+  # =========================================================================
+  push-registry:
+    name: Publish Images to GHCR
+    needs: container-security-gate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Tag Images
+        run: |
+          docker build -t ${{ env.IMAGE_BACKEND }}:${{ github.sha }} -t ${{ env.IMAGE_BACKEND }}:latest ./application/backend
+          docker build -t ${{ env.IMAGE_FRONTEND }}:${{ github.sha }} -t ${{ env.IMAGE_FRONTEND }}:latest ./application/frontend
+
+      - name: Push Images to GHCR
+        run: |
+          docker push ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_BACKEND }}:latest
+          docker push ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_FRONTEND }}:latest
+
+  # =========================================================================
+  # STAGE 5: Kubernetes CD Deployment & Rollout Verification
+  # =========================================================================
+  deploy:
+    name: Helm / Kubernetes Rollout
+    needs: push-registry
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Setup Kubeconfig
+        if: env.KUBE_CONFIG_DATA != ''
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
+
+      - name: Helm Deploy to Cluster
+        if: env.KUBE_CONFIG_DATA != ''
+        run: |
+          helm upgrade --install taskboard ./helm/taskboard \
+            --namespace taskboard --create-namespace \
+            --set backend.image=${{ env.IMAGE_BACKEND }} \
+            --set backend.tag=${{ github.sha }} \
+            --set frontend.image=${{ env.IMAGE_FRONTEND }} \
+            --set frontend.tag=${{ github.sha }}
+
+      - name: Verify Rollout Status
+        if: env.KUBE_CONFIG_DATA != ''
+        run: |
+          kubectl rollout status deployment/taskboard-backend -n taskboard --timeout=120s
+          kubectl rollout status deployment/taskboard-frontend -n taskboard --timeout=120s
+
