@@ -58,23 +58,25 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
           docker push ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
   deploy:
-    if: github.ref == 'refs/heads/main' && secrets.KUBE_CONFIG_DATA != ''
+    if: github.ref == 'refs/heads/main'
     needs: build-scan-push
     runs-on: ubuntu-latest
     permissions: {contents: read, packages: read}
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
-      - name: Configure kubectl
+      - name: Deploy or Validate
         env: {KUBE_CONFIG_DATA: '${{ secrets.KUBE_CONFIG_DATA }}'}
         run: |
-          mkdir -p ~/.kube
-          echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
-      - name: Deploy with Helm
-        run: |
-          helm upgrade --install taskboard ./helm/taskboard -n taskboard --create-namespace \
-            --set backend.tag=${{ github.sha }} \
-            --set frontend.tag=${{ github.sha }} \
-            --set backend.image=ghcr.io/${{ github.repository_owner }}/taskboard-backend \
-            --set frontend.image=ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+          if [ -n "$KUBE_CONFIG_DATA" ]; then
+            mkdir -p ~/.kube
+            echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
+            helm upgrade --install taskboard ./helm/taskboard -n taskboard --create-namespace \
+              --set backend.tag=${{ github.sha }} \
+              --set frontend.tag=${{ github.sha }} \
+              --set backend.image=ghcr.io/${{ github.repository_owner }}/taskboard-backend \
+              --set frontend.image=ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+          else
+            helm lint ./helm/taskboard
+          fi
 
