@@ -28,67 +28,71 @@ def test_root_endpoint():
     assert "service" in data
     assert data["docs"] == "/docs"
 
-def test_create_task():
-    """Verify creating a new task with status, priority, and assignee."""
+def test_create_expense():
+    """Verify creating a new expense with amount, category, and payer."""
     payload = {
-        "title": "Configure EKS Terraform Module",
-        "description": "Provision VPC, subnets, and worker node group",
-        "status": "TODO",
-        "priority": "HIGH",
-        "assignee": "DevOps Engineer"
+        "title": "Flight to Mumbai",
+        "notes": "DevOps conference travel",
+        "amount": 12500.0,
+        "status": "PENDING",
+        "category": "TRAVEL",
+        "paid_by": "Akshat"
     }
-    response = client.post("/api/tasks", json=payload)
+    response = client.post("/api/expenses", json=payload)
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == payload["title"]
-    assert data["priority"] == "HIGH"
+    assert data["category"] == "TRAVEL"
+    assert data["amount"] == 12500.0
     assert "id" in data
 
-def test_list_tasks():
-    """Verify listing all tasks from the API."""
-    response = client.get("/api/tasks")
+def test_list_expenses():
+    """Verify listing all expenses from the API."""
+    response = client.get("/api/expenses")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
-def test_get_task_by_id():
-    """Verify retrieving a single task by its identifier."""
-    # First create a task
-    created = client.post("/api/tasks", json={"title": "Setup Ingress Controller", "priority": "MEDIUM", "assignee": "Alex"}).json()
-    task_id = created["id"]
+def test_get_expense_by_id():
+    """Verify retrieving a single expense by its identifier."""
+    # First create an expense
+    created = client.post("/api/expenses", json={"title": "Team lunch", "amount": 2400.0, "category": "FOOD", "paid_by": "Alex"}).json()
+    expense_id = created["id"]
 
-    response = client.get(f"/api/tasks/{task_id}")
+    response = client.get(f"/api/expenses/{expense_id}")
     assert response.status_code == 200
-    assert response.json()["id"] == task_id
-    assert response.json()["title"] == "Setup Ingress Controller"
+    assert response.json()["id"] == expense_id
+    assert response.json()["title"] == "Team lunch"
 
-def test_update_task():
-    """Verify updating task status and priority."""
-    created = client.post("/api/tasks", json={"title": "Fix Broken Service", "priority": "LOW", "assignee": "Sara"}).json()
-    task_id = created["id"]
+def test_update_expense():
+    """Verify updating expense status and amount."""
+    created = client.post("/api/expenses", json={"title": "AWS bill", "amount": 8000.0, "category": "BILLS", "paid_by": "Sara"}).json()
+    expense_id = created["id"]
 
-    update_payload = {"status": "DONE", "priority": "HIGH"}
-    response = client.put(f"/api/tasks/{task_id}", json=update_payload)
+    update_payload = {"status": "PAID", "amount": 8500.0}
+    response = client.put(f"/api/expenses/{expense_id}", json=update_payload)
     assert response.status_code == 200
-    assert response.json()["status"] == "DONE"
-    assert response.json()["priority"] == "HIGH"
+    assert response.json()["status"] == "PAID"
+    assert response.json()["amount"] == 8500.0
 
-def test_task_stats():
-    """Verify aggregation endpoint returns valid metric counts."""
-    response = client.get("/api/tasks/stats")
+def test_expense_stats():
+    """Verify aggregation endpoint returns valid metric counts and spend."""
+    response = client.get("/api/expenses/stats")
     assert response.status_code == 200
     stats = response.json()
     assert "total" in stats
-    assert "todo" in stats
-    assert "inProgress" in stats
-    assert "done" in stats
+    assert "pending" in stats
+    assert "approved" in stats
+    assert "paid" in stats
+    assert "total_spend" in stats
+    assert stats["total_spend"] >= 0
 
-def test_delete_task():
-    """Verify deleting a task removes it permanently."""
-    created = client.post("/api/tasks", json={"title": "Temporary Task", "priority": "LOW", "assignee": "Tester"}).json()
-    task_id = created["id"]
+def test_delete_expense():
+    """Verify deleting an expense removes it permanently."""
+    created = client.post("/api/expenses", json={"title": "Temporary expense", "amount": 100.0, "category": "OTHER", "paid_by": "Tester"}).json()
+    expense_id = created["id"]
 
-    del_resp = client.delete(f"/api/tasks/{task_id}")
+    del_resp = client.delete(f"/api/expenses/{expense_id}")
     assert del_resp.status_code == 204
 
-    get_resp = client.get(f"/api/tasks/{task_id}")
+    get_resp = client.get(f"/api/expenses/{expense_id}")
     assert get_resp.status_code == 404
