@@ -13,7 +13,7 @@ postgres:
   username: expensepilot
   password: expensepilot
 ingress:
-  enabled: false
+  enabled: true
   host: expensepilot.local
 hpa:
   enabled: true
