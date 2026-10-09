@@ -75,10 +75,10 @@ function App() {
           <div><b>ExpensePilot</b><small>DevOps Capstone</small></div>
         </div>
         <nav>
-          <a className="active">\u25a6 <span>Dashboard</span></a>
-          <a>\u20b9 <span>My Expenses</span></a>
-          <a>\u25eb <span>Budgets</span></a>
-          <a>\u25cc <span>Activity</span></a>
+          <a className="active">📊 <span>Dashboard</span></a>
+          <a>🧾 <span>My Expenses</span></a>
+          <a>💰 <span>Budgets</span></a>
+          <a>📈 <span>Activity</span></a>
         </nav>
         <div className="side-bottom">
           <div className="upgrade">
@@ -88,7 +88,7 @@ function App() {
           <div className="profile">
             <div className="avatar">AP</div>
             <div><b>Akshat Sipany</b><small>Finance Admin</small></div>
-            <span>\u22ee</span>
+            <span>⋯</span>
           </div>
         </div>
       </aside>
@@ -99,14 +99,14 @@ function App() {
             <h1>Good morning, Akshat</h1>
             <p className="muted">Here is what your team is spending today.</p>
           </div>
-          <button className="primary" onClick={() => setShowForm(true)}>\u2795 New expense</button>
+          <button className="primary" onClick={() => setShowForm(true)}>+ New expense</button>
         </header>
         {error && <div className="alert">Backend unavailable. Start the backend and PostgreSQL, then refresh.</div>}
         <section className="stats">
-          <Stat label="Total spend" value={fmt(stats.total_spend)} icon="\u20b9" />
-          <Stat label="Pending" value={stats.pending} icon="\u25cb" />
-          <Stat label="Approved" value={stats.approved} icon="\u25d4" />
-          <Stat label="Paid" value={stats.paid} icon="\u2713" />
+          <Stat label="Total spend" value={fmt(stats.total_spend)} icon="💰" />
+          <Stat label="Pending" value={stats.pending} icon="⏳" />
+          <Stat label="Approved" value={stats.approved} icon="✅" />
+          <Stat label="Paid" value={stats.paid} icon="✔️" />
         </section>
         <section className="content-grid">
           <div className="panel tasks-panel">
@@ -146,7 +146,7 @@ function App() {
                         <td><span className={`status ${t.status.toLowerCase()}`}>{t.status}</span></td>
                         <td>
                           <button className="icon-btn" onClick={() => advanceStatus(t)} title="Advance status">
-                            \u21bb
+                            →
                           </button>
                         </td>
                       </tr>
@@ -164,10 +164,10 @@ function App() {
                 <p className="muted">Latest finance events.</p>
               </div>
             </div>
-            <Activity icon="\u2713" text="AWS bill marked as paid" time="12 min ago" />
-            <Activity icon="\u25d4" text="Flight to Mumbai approved" time="38 min ago" />
-            <Activity icon="\u2795" text="New team lunch expense added" time="1 hr ago" />
-            <Activity icon="\u2197" text="Deployment pipeline passed" time="2 hrs ago" />
+            <Activity icon="✅" text="AWS bill marked as paid" time="12 min ago" />
+            <Activity icon="✈️" text="Flight to Mumbai approved" time="38 min ago" />
+            <Activity icon="➕" text="New team lunch expense added" time="1 hr ago" />
+            <Activity icon="🚀" text="Deployment pipeline passed" time="2 hrs ago" />
             <div className="pipeline"><span>CI</span><i></i><span>Build</span><i></i><span>Scan</span><i></i><span>Deploy</span></div>
           </aside>
         </section>
@@ -179,7 +179,7 @@ function App() {
                   <p className="eyebrow">LOG EXPENSE</p>
                   <h2>Add a new expense</h2>
                 </div>
-                <button type="button" className="close" onClick={() => setShowForm(false)}>\u00d7</button>
+                <button type="button" className="close" onClick={() => setShowForm(false)}>×</button>
               </div>
               <label>Expense title<input name="title" required placeholder="e.g. Flight to Mumbai" /></label>
               <label>Notes<textarea name="notes" placeholder="What was this spend for?" /></label>
