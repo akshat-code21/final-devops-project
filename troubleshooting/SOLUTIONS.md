@@ -20,7 +20,7 @@ When encountering an incident in Kubernetes, always follow this systematic workf
 - **Deployment:** `scenario1-broken-image`
 
 ### 1. Identify the Issue
-Run `kubectl get pods -n taskboard`:
+Run `kubectl get pods -n expensepilot`:
 ```text
 NAME                                     READY   STATUS             RESTARTS   AGE
 scenario1-broken-image-79f9798cf8-2xkl5   0/1     ImagePullBackOff   0          42s
@@ -30,18 +30,18 @@ The pod cannot start because the container runtime cannot pull the image.
 ### 2. Investigate Logs and Resources
 Check Pod events:
 ```bash
-kubectl describe pod -l troubleshooting=scenario1 -n taskboard
+kubectl describe pod -l troubleshooting=scenario1 -n expensepilot
 ```
 **Output snippet:**
 ```text
 Events:
   Type     Reason     Age                From               Message
   ----     ------     ----               ----               -------
-  Normal   Scheduled  45s                default-scheduler  Successfully assigned taskboard/scenario1-broken-image to node-1
-  Normal   Pulling    12s (x3 over 44s)  kubelet            Pulling image "ghcr.io/devops-capstone/taskboard-backend:v99.9.9-nonexistent"
-  Warning  Failed     11s (x3 over 43s)  kubelet            Failed to pull image "ghcr.io/devops-capstone/taskboard-backend:v99.9.9-nonexistent": rpc error: code = NotFound
+  Normal   Scheduled  45s                default-scheduler  Successfully assigned expensepilot/scenario1-broken-image to node-1
+  Normal   Pulling    12s (x3 over 44s)  kubelet            Pulling image "ghcr.io/devops-capstone/expensepilot-backend:v99.9.9-nonexistent"
+  Warning  Failed     11s (x3 over 43s)  kubelet            Failed to pull image "ghcr.io/devops-capstone/expensepilot-backend:v99.9.9-nonexistent": rpc error: code = NotFound
   Warning  Failed     11s (x3 over 43s)  kubelet            Error: ErrImagePull
-  Normal   BackOff    1s (x4 over 42s)   kubelet            Back-off pulling image "ghcr.io/devops-capstone/taskboard-backend:v99.9.9-nonexistent"
+  Normal   BackOff    1s (x4 over 42s)   kubelet            Back-off pulling image "ghcr.io/devops-capstone/expensepilot-backend:v99.9.9-nonexistent"
 ```
 
 ### 3. Find Root Cause
@@ -50,12 +50,12 @@ The image tag `v99.9.9-nonexistent` does not exist in the registry (or image pul
 ### 4. Fix the Issue
 Patch the deployment to use a valid, existing image tag:
 ```bash
-kubectl set image deployment/scenario1-broken-image app=python:3.12-slim -n taskboard
+kubectl set image deployment/scenario1-broken-image app=python:3.12-slim -n expensepilot
 ```
 
 ### 5. Verify the Solution
 ```bash
-kubectl get pods -l troubleshooting=scenario1 -n taskboard
+kubectl get pods -l troubleshooting=scenario1 -n expensepilot
 ```
 Status changes to `Running` (1/1).
 
@@ -66,14 +66,14 @@ Status changes to `Running` (1/1).
 
 ### 1. Identify the Issue
 ```bash
-kubectl get pods -l troubleshooting=scenario2 -n taskboard
+kubectl get pods -l troubleshooting=scenario2 -n expensepilot
 ```
 Status shows `CrashLoopBackOff`, and restart count increments every few seconds.
 
 ### 2. Investigate Logs and Resources
 Inspect container stdout/stderr logs:
 ```bash
-kubectl logs -l troubleshooting=scenario2 -n taskboard --tail=50
+kubectl logs -l troubleshooting=scenario2 -n expensepilot --tail=50
 ```
 **Output snippet:**
 ```text
@@ -82,18 +82,18 @@ CRITICAL: Host postgres-broken-host not found!
 ```
 
 ### 3. Find Root Cause
-The container is trying to connect to a non-existent DNS hostname `postgres-broken-host`. In Kubernetes, services must be reached using the valid in-cluster CoreDNS name (e.g. `taskboard-postgres.taskboard.svc.cluster.local` or `taskboard-postgres`).
+The container is trying to connect to a non-existent DNS hostname `postgres-broken-host`. In Kubernetes, services must be reached using the valid in-cluster CoreDNS name (e.g. `expensepilot-postgres.expensepilot.svc.cluster.local` or `expensepilot-postgres`).
 
 ### 4. Fix the Issue
 Update the container command or environment variables to point to the correct PostgreSQL service:
 ```bash
-kubectl set env deployment/scenario2-crashloop-db DATABASE_URL="postgresql+psycopg://taskboard:taskboard@taskboard-postgres:5432/taskboard" -n taskboard
+kubectl set env deployment/scenario2-crashloop-db DATABASE_URL="postgresql+psycopg://expensepilot:expensepilot@expensepilot-postgres:5432/expensepilot" -n expensepilot
 ```
 
 ### 5. Verify the Solution
 Check logs and status:
 ```bash
-kubectl get pods -l troubleshooting=scenario2 -n taskboard
+kubectl get pods -l troubleshooting=scenario2 -n expensepilot
 ```
 Pod maintains `Running` state without restarts.
 
@@ -108,8 +108,8 @@ Clients attempting to reach `scenario3-broken-service:8080` receive connection t
 ### 2. Investigate Logs and Resources
 Check service details and endpoints:
 ```bash
-kubectl get svc scenario3-broken-service -n taskboard
-kubectl get endpoints scenario3-broken-service -n taskboard
+kubectl get svc scenario3-broken-service -n expensepilot
+kubectl get endpoints scenario3-broken-service -n expensepilot
 ```
 **Output snippet:**
 ```text
@@ -120,27 +120,27 @@ Endpoints list is `<none>`!
 
 Check pod labels:
 ```bash
-kubectl get pods --show-labels -n taskboard
+kubectl get pods --show-labels -n expensepilot
 ```
-Pod label is `app=taskboard-backend-actual`, while Service selector is:
+Pod label is `app=expensepilot-backend-actual`, while Service selector is:
 ```bash
-kubectl get svc scenario3-broken-service -n taskboard -o jsonpath="{.spec.selector}"
-# Output: {"app":"taskboard-backend-typo-label"}
+kubectl get svc scenario3-broken-service -n expensepilot -o jsonpath="{.spec.selector}"
+# Output: {"app":"expensepilot-backend-typo-label"}
 ```
 
 ### 3. Find Root Cause
-Label selector mismatch between the Kubernetes Service and the Pods. The Service is selecting `taskboard-backend-typo-label`, but the pods are labeled `taskboard-backend-actual`.
+Label selector mismatch between the Kubernetes Service and the Pods. The Service is selecting `expensepilot-backend-typo-label`, but the pods are labeled `expensepilot-backend-actual`.
 
 ### 4. Fix the Issue
 Patch the service selector:
 ```bash
-kubectl patch svc scenario3-broken-service -n taskboard -p '{"spec":{"selector":{"app":"taskboard-backend-actual"}}}'
+kubectl patch svc scenario3-broken-service -n expensepilot -p '{"spec":{"selector":{"app":"expensepilot-backend-actual"}}}'
 ```
 
 ### 5. Verify the Solution
 Check endpoints again:
 ```bash
-kubectl get endpoints scenario3-broken-service -n taskboard
+kubectl get endpoints scenario3-broken-service -n expensepilot
 ```
 Now shows the Pod's private IP (e.g., `10.244.0.15:8080`). Traffic routes successfully.
 
@@ -151,13 +151,13 @@ Now shows the Pod's private IP (e.g., `10.244.0.15:8080`). Traffic routes succes
 
 ### 1. Identify the Issue
 ```bash
-kubectl get pods -l app=scenario4-pending -n taskboard
+kubectl get pods -l app=scenario4-pending -n expensepilot
 ```
 Pod is stuck in `Pending` state indefinitely.
 
 ### 2. Investigate Logs and Resources
 ```bash
-kubectl describe pod -l app=scenario4-pending -n taskboard
+kubectl describe pod -l app=scenario4-pending -n expensepilot
 ```
 **Output snippet:**
 ```text
@@ -169,7 +169,7 @@ Events:
 
 Inspect the PVC:
 ```bash
-kubectl describe pvc scenario4-unbound-pvc -n taskboard
+kubectl describe pvc scenario4-unbound-pvc -n expensepilot
 ```
 **Output snippet:**
 ```text
@@ -192,8 +192,8 @@ kubectl apply -f kubernetes/03-storage-pvc.yaml
 
 ### 5. Verify the Solution
 ```bash
-kubectl get pvc -n taskboard
-kubectl get pods -n taskboard
+kubectl get pvc -n expensepilot
+kubectl get pods -n expensepilot
 ```
 PVC becomes `Bound` and the Pod transitions from `Pending` to `Running`.
 
@@ -205,7 +205,7 @@ PVC becomes `Bound` and the Pod transitions from `Pending` to `Running`.
 ### 1. Identify the Issue
 Making a request through Ingress returns `502 Bad Gateway`:
 ```bash
-curl -I -H "Host: taskboard.local" http://localhost/api/tasks
+curl -I -H "Host: expensepilot.local" http://localhost/api/tasks
 # HTTP/1.1 502 Bad Gateway
 ```
 
@@ -216,13 +216,13 @@ kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx --tail=50
 ```
 **Output snippet:**
 ```text
-[error] connect() failed (111: Connection refused) while connecting to upstream, client: 10.244.0.1, server: taskboard.local, request: "GET /api/tasks HTTP/1.1", upstream: "http://10.244.0.8:8080/api/tasks"
+[error] connect() failed (111: Connection refused) while connecting to upstream, client: 10.244.0.1, server: expensepilot.local, request: "GET /api/tasks HTTP/1.1", upstream: "http://10.244.0.8:8080/api/tasks"
 ```
 The Ingress is attempting to route to upstream port 8080!
 
 Check backend service:
 ```bash
-kubectl get svc taskboard-backend -n taskboard
+kubectl get svc expensepilot-backend -n expensepilot
 ```
 The backend service port is 8000, not 8080!
 
@@ -232,12 +232,12 @@ Ingress resource has target port configured as `8080` instead of `8000`.
 ### 4. Fix the Issue
 Edit the Ingress resource:
 ```bash
-kubectl patch ingress taskboard-ingress -n taskboard --type='json' -p='[{"op": "replace", "path": "/spec/rules/0/http/paths/0/backend/service/port/number", "value": 8000}]'
+kubectl patch ingress expensepilot-ingress -n expensepilot --type='json' -p='[{"op": "replace", "path": "/spec/rules/0/http/paths/0/backend/service/port/number", "value": 8000}]'
 ```
 
 ### 5. Verify the Solution
 ```bash
-curl -i -H "Host: taskboard.local" http://localhost/health
+curl -i -H "Host: expensepilot.local" http://localhost/health
 # HTTP/1.1 200 OK
 # {"status":"UP"}
 ```

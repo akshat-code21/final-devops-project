@@ -30,7 +30,7 @@
 
 ## 1. Project Overview
 
-This capstone project delivers a production-grade, secure, cloud-native DevOps lifecycle implementation for **TaskBoard**—a multi-tier SaaS project management application.
+This capstone project delivers a production-grade, secure, cloud-native DevOps lifecycle implementation for **ExpensePilot**—a personal finance expense-tracking application.
 
 Rather than running isolated scripts or ad-hoc containers, the project establishes an automated enterprise software delivery and operations lifecycle:
 - **Application Layer:** Modern React 18 single-page frontend, FastAPI asynchronous Python backend, and PostgreSQL relational database with Alembic schema migrations.
@@ -96,8 +96,8 @@ flowchart TD
         Browser["User Web Browser"]
     end
 
-    subgraph K8s ["Kubernetes Cluster (Namespace: taskboard)"]
-        Ingress["Ingress Controller (NGINX)<br/>taskboard.local"]
+    subgraph K8s ["Kubernetes Cluster (Namespace: expensepilot)"]
+        Ingress["Ingress Controller (NGINX)<br/>expensepilot.local"]
         
         subgraph FrontendTier ["Frontend Tier"]
             F_SVC["frontend-service (ClusterIP: 80)"]
@@ -109,7 +109,7 @@ flowchart TD
             B_DEP["backend-deployment (2 Replicas)<br/>FastAPI / Python 3.12"]
             HPA["HorizontalPodAutoscaler<br/>Target: 60% CPU (2-6 Pods)"]
             CM["ConfigMap: backend-config"]
-            SEC["Secret: taskboard-secrets"]
+            SEC["Secret: expensepilot-secrets"]
         end
 
         subgraph StorageTier ["Data Tier"]
@@ -125,7 +125,7 @@ flowchart TD
         end
     end
 
-    Browser -->|Host: taskboard.local /| Ingress
+    Browser -->|Host: expensepilot.local /| Ingress
     Ingress -->|/api| B_SVC
     Ingress -->|/| F_SVC
     F_SVC --> F_DEP
@@ -168,7 +168,7 @@ flowchart TD
 
 ## 4. Application Setup
 
-The TaskBoard application consists of an asynchronous Python FastAPI service, a PostgreSQL persistent database, and a Vite-powered React UI.
+The ExpensePilot application consists of an asynchronous Python FastAPI service, a PostgreSQL persistent database, and a Vite-powered React UI.
 
 ### Directory Layout
 ```text
@@ -177,7 +177,7 @@ application/
 │   ├── app/
 │   │   ├── config.py       # Pydantic environment configuration
 │   │   ├── db.py           # Database engine & session maker
-│   │   ├── models.py       # SQLAlchemy ORM models (Task)
+│   │   ├── models.py       # SQLAlchemy ORM models (Expense)
 │   │   ├── schemas.py      # Pydantic request/response schemas
 │   │   └── main.py         # FastAPI application routes & instrumentation
 │   ├── alembic/            # Database migration scripts
@@ -217,12 +217,12 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - `GET /health` — Kubernetes liveness probe check (`{"status": "UP"}`)
 - `GET /ready` — Kubernetes readiness probe verifying database connectivity (`{"status": "READY"}`)
 - `GET /metrics` — Prometheus-compatible metrics endpoint
-- `GET /api/tasks` — List all tasks ordered by creation date
-- `POST /api/tasks` — Create a new task
-- `GET /api/tasks/{id}` — Fetch specific task
-- `PUT /api/tasks/{id}` — Update task title, status, or priority
-- `DELETE /api/tasks/{id}` — Remove task
-- `GET /api/tasks/stats` — Aggregate metrics (total, todo, in-progress, done)
+- `GET /api/expenses` — List all expenses ordered by creation date
+- `POST /api/expenses` — Log a new expense
+- `GET /api/expenses/{id}` — Fetch a specific expense
+- `PUT /api/expenses/{id}` — Update amount, status, or category
+- `DELETE /api/expenses/{id}` — Remove an expense
+- `GET /api/expenses/stats` — Aggregate metrics (total, pending, approved, paid, total_spend)
 
 ---
 
@@ -254,7 +254,7 @@ Access points:
 ## 6. Kubernetes Deployment
 
 The project provides declarative Kubernetes manifests in `kubernetes/`:
-- `00-namespace.yaml`: Dedicated namespace `taskboard` for logical isolation.
+- `00-namespace.yaml`: Dedicated namespace `expensepilot` for logical isolation.
 - `01-configmap.yaml`: Non-sensitive configuration (`APP_NAME`, `ENVIRONMENT`, `DB_HOST`).
 - `02-secret.yaml`: Secure database credentials and connection strings.
 - `03-storage-pvc.yaml`: PersistentVolumeClaim requesting 5Gi persistent block storage for PostgreSQL data persistence across pod restarts.
@@ -263,7 +263,7 @@ The project provides declarative Kubernetes manifests in `kubernetes/`:
 - `06-backend-service.yaml`: ClusterIP Service exposing port 8000.
 - `07-frontend-deployment.yaml`: Frontend Deployment running 2 replicas with Nginx HTTP probes.
 - `08-frontend-service.yaml`: ClusterIP Service exposing port 80.
-- `09-ingress.yaml`: Ingress routing host `taskboard.local` (`/api` -> backend:8000, `/` -> frontend:80).
+- `09-ingress.yaml`: Ingress routing host `expensepilot.local` (`/api` -> backend:8000, `/` -> frontend:80).
 - `10-hpa.yaml`: Horizontal Pod Autoscaler targeting 60% CPU utilization, scaling backend from 2 to 6 pods.
 
 ### Applying Manifests
@@ -289,7 +289,7 @@ Helm packages the entire application into a parameterized, reusable, and upgrade
 
 ### Helm Chart Structure
 ```text
-helm/taskboard/
+helm/expensepilot/
 ├── Chart.yaml              # Chart metadata (version 0.1.0)
 ├── values.yaml             # Default configuration values
 ├── values-dev.yaml         # Development environment overrides (ingress enabled)
@@ -309,23 +309,23 @@ helm/taskboard/
 ### Helm Commands
 ```bash
 # Lint the chart
-helm lint helm/taskboard
+helm lint helm/expensepilot
 
 # Dry run template rendering
-helm template taskboard helm/taskboard -f helm/taskboard/values-dev.yaml
+helm template expensepilot helm/expensepilot -f helm/expensepilot/values-dev.yaml
 
 # Install or upgrade release
-helm upgrade --install taskboard ./helm/taskboard \
-  --namespace taskboard \
+helm upgrade --install expensepilot ./helm/expensepilot \
+  --namespace expensepilot \
   --create-namespace \
-  -f ./helm/taskboard/values-dev.yaml
+  -f ./helm/expensepilot/values-dev.yaml
 
 # Check release status
-helm list -n taskboard
-helm status taskboard -n taskboard
+helm list -n expensepilot
+helm status expensepilot -n expensepilot
 
 # Rollback if needed
-helm rollback taskboard 1 -n taskboard
+helm rollback expensepilot 1 -n expensepilot
 ```
 
 ---
@@ -363,7 +363,7 @@ terraform plan -out=tfplan
 terraform apply tfplan
 
 # 5. Configure kubectl with new EKS cluster
-aws eks update-kubeconfig --region ap-south-1 --name taskboard-eks
+aws eks update-kubeconfig --region ap-south-1 --name expensepilot-eks
 
 # 6. Teardown all resources after testing (Mandatory to eliminate cloud costs)
 terraform destroy -auto-approve
@@ -435,8 +435,8 @@ Observability is implemented using the industry-standard **Prometheus + Grafana*
   3. Pod CPU & Memory resource consumption.
   4. HTTP 5xx error rate percentage.
 - **Alerting Rules:**
-  - `TaskBoardBackendDown`: Triggers Critical alert if Prometheus fails to scrape backend pods for > 1 minute.
-  - `TaskBoardHigh5xxErrorRate`: Triggers Warning alert if 5xx errors exceed 5% of total traffic.
+  - `ExpensePilotBackendDown`: Triggers Critical alert if Prometheus fails to scrape backend pods for > 1 minute.
+  - `ExpensePilotHigh5xxErrorRate`: Triggers Warning alert if 5xx errors exceed 5% of total traffic.
 
 ---
 
@@ -444,7 +444,7 @@ Observability is implemented using the industry-standard **Prometheus + Grafana*
 
 The GitOps implementation utilizes **ArgoCD** to follow the pull-based continuous delivery paradigm:
 - The Git repository is configured as the **Single Source of Truth**.
-- ArgoCD continuously monitors `helm/taskboard` in the Git repository.
+- ArgoCD continuously monitors `helm/expensepilot` in the Git repository.
 - When an engineer merges code or the CI pipeline updates image tags in Git, ArgoCD automatically pulls the new manifest and reconciles the cluster state.
 - **Self-Healing & Drift Detection:** If an operator manually alters a resource or deletes a pod with `kubectl`, ArgoCD automatically overwrites the drift and restores the desired state declared in Git.
 
@@ -463,7 +463,7 @@ Incident 5: Ingress 502 Bad Gateway (Port mismatch between Ingress & Service)
 ```
 
 ### Standard 6-Step Troubleshooting Framework
-1. **Identify the Issue:** `kubectl get pods -n taskboard`, check pod status and restart count.
+1. **Identify the Issue:** `kubectl get pods -n expensepilot`, check pod status and restart count.
 2. **Investigate Logs & Resources:** Run `kubectl describe pod <name>` and `kubectl logs <name> --previous`.
 3. **Find the Root Cause:** Pinpoint the exact mismatch (DNS, port, label, or missing volume).
 4. **Fix the Issue:** Apply the corrected manifest or patch.
@@ -478,7 +478,7 @@ To fulfill all requirements in the capstone grading rubric (100 points), prepare
 
 | Module | Required Evidence Screenshot | Command / View | Expected Result |
 | :--- | :--- | :--- | :--- |
-| **M1** | Running Application in Browser | Browser at `http://localhost:3000` | TaskBoard UI loaded with task list & stats |
+| **M1** | Running Application in Browser | Browser at `http://localhost:3000` | ExpensePilot UI loaded with expense list, spend totals & stats |
 | **M2** | Automated Testing | Terminal: `pytest -v` | 8/8 tests passing in green |
 | **M3** | Git Version Control | Terminal: `git log --oneline -n 10` | 10+ clean semantic commits |
 | **M4** | Docker Compose Stack | Terminal: `docker compose ps` | postgres, backend, frontend all `Up (healthy)` |
@@ -487,9 +487,9 @@ To fulfill all requirements in the capstone grading rubric (100 points), prepare
 | **M6** | Trivy Security Scan Output | GitHub Actions Trivy step log | Table showing 0 HIGH/CRITICAL vulnerabilities |
 | **M7** | Terraform Plan Output | Terminal: `terraform plan` | Plan: X to add, 0 to change, 0 to destroy |
 | **M7** | AWS EKS Console / Teardown | AWS Console / `terraform destroy` | EKS Cluster active / clean teardown screenshot |
-| **M8** | Kubernetes Running Pods | Terminal: `kubectl get pods -n taskboard` | All pods in `Running` state (2 frontend, 2 backend, 1 db) |
-| **M8** | Kubernetes Services & Ingress | Terminal: `kubectl get svc,ingress,hpa -n taskboard` | ClusterIPs bound, Ingress host active, HPA active |
-| **M8** | Helm Release | Terminal: `helm list -n taskboard` | Release `taskboard` in `deployed` status |
+| **M8** | Kubernetes Running Pods | Terminal: `kubectl get pods -n expensepilot` | All pods in `Running` state (2 frontend, 2 backend, 1 db) |
+| **M8** | Kubernetes Services & Ingress | Terminal: `kubectl get svc,ingress,hpa -n expensepilot` | ClusterIPs bound, Ingress host active, HPA active |
+| **M8** | Helm Release | Terminal: `helm list -n expensepilot` | Release `expensepilot` in `deployed` status |
 | **M9** | Backend Metrics Endpoint | Terminal: `curl http://<backend>/metrics` | Prometheus metrics with `http_requests_total` |
 | **M9** | Grafana Observability Dashboard | Browser at Grafana UI | Live dashboards showing RPS, latency, and CPU usage |
 | **GitOps**| ArgoCD UI Sync Status | Browser at ArgoCD UI | Application status showing `Synced` and `Healthy` |
@@ -519,7 +519,7 @@ To execute and submit this capstone project completely, the student requires:
    - Ingress requires an in-cluster controller (such as `ingress-nginx`).
    - Domain resolution requires updating the local `/etc/hosts` file:
      ```text
-     127.0.0.1 taskboard.local
+     127.0.0.1 expensepilot.local
      ```
 4. **Kubernetes Metrics Server:**
    - The HorizontalPodAutoscaler (HPA) requires `metrics-server` installed in the cluster to gather pod CPU utilization. Without it, HPA displays `<unknown>/60%`.

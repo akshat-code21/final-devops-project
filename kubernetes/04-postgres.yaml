@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taskboard-postgres
-  namespace: taskboard
+  name: expensepilot-postgres
+  namespace: expensepilot
   labels:
-    app: taskboard-postgres
+    app: expensepilot-postgres
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: taskboard-postgres
+      app: expensepilot-postgres
   template:
     metadata:
       labels:
-        app: taskboard-postgres
+        app: expensepilot-postgres
     spec:
       containers:
         - name: postgres
@@ -25,17 +25,17 @@ spec:
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: taskboard-backend-config
+                  name: expensepilot-backend-config
                   key: DB_NAME
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: taskboard-secrets
+                  name: expensepilot-secrets
                   key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: taskboard-secrets
+                  name: expensepilot-secrets
                   key: POSTGRES_PASSWORD
           resources:
             requests:
@@ -62,19 +62,19 @@ spec:
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
-            claimName: taskboard-postgres-pvc
+            claimName: expensepilot-postgres-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: taskboard-postgres
-  namespace: taskboard
+  name: expensepilot-postgres
+  namespace: expensepilot
   labels:
-    app: taskboard-postgres
+    app: expensepilot-postgres
 spec:
   type: ClusterIP
   selector:
-    app: taskboard-postgres
+    app: expensepilot-postgres
   ports:
     - port: 5432
       targetPort: 5432

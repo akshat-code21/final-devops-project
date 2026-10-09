@@ -1,4 +1,4 @@
-name: TaskBoard Python CI/CD
+name: ExpensePilot Python CI/CD
 on:
   push:
     branches: [main]
@@ -37,26 +37,26 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build images
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }} ./backend
-          docker build -t ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }} ./frontend
+          docker build -t ghcr.io/${{ github.repository_owner }}/expensepilot-backend:${{ github.sha }} ./backend
+          docker build -t ghcr.io/${{ github.repository_owner }}/expensepilot-frontend:${{ github.sha }} ./frontend
       - name: Scan backend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/expensepilot-backend:${{ github.sha }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
       - name: Scan frontend
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/expensepilot-frontend:${{ github.sha }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
       - name: Push images
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/expensepilot-backend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/expensepilot-frontend:${{ github.sha }}
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build-scan-push
@@ -75,16 +75,16 @@ jobs:
             else
               echo "$KUBE_CONFIG_DATA" > ~/.kube/config
             fi
-            if kubectl get ns taskboard --request-timeout=5s > /dev/null 2>&1; then
-              helm upgrade --install taskboard ./helm/taskboard -n taskboard --create-namespace \
+            if kubectl get ns expensepilot --request-timeout=5s > /dev/null 2>&1; then
+              helm upgrade --install expensepilot ./helm/expensepilot -n expensepilot --create-namespace \
                 --set backend.tag=${{ github.sha }} \
                 --set frontend.tag=${{ github.sha }} \
-                --set backend.image=ghcr.io/${{ github.repository_owner }}/taskboard-backend \
-                --set frontend.image=ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+                --set backend.image=ghcr.io/${{ github.repository_owner }}/expensepilot-backend \
+                --set frontend.image=ghcr.io/${{ github.repository_owner }}/expensepilot-frontend
             else
-              helm lint ./helm/taskboard
+              helm lint ./helm/expensepilot
             fi
           else
-            helm lint ./helm/taskboard
+            helm lint ./helm/expensepilot
           fi
 

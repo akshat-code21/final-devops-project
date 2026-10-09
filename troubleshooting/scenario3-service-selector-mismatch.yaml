@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scenario3-backend-app
-  namespace: taskboard
+  namespace: expensepilot
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: taskboard-backend-actual
+      app: expensepilot-backend-actual
   template:
     metadata:
       labels:
-        app: taskboard-backend-actual
+        app: expensepilot-backend-actual
     spec:
       containers:
         - name: app
@@ -24,11 +24,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: scenario3-broken-service
-  namespace: taskboard
+  namespace: expensepilot
 spec:
   type: ClusterIP
   selector:
-    app: taskboard-backend-typo-label
+    app: expensepilot-backend-typo-label
   ports:
     - port: 8080
       targetPort: 8080

@@ -1,5 +1,5 @@
 # Gitleaks Configuration for Secret Scanning
-title = "TaskBoard Secret Detection Policy"
+title = "ExpensePilot Secret Detection Policy"
 
 [extend]
 # Extend default gitleaks rules
@@ -24,7 +24,7 @@ paths = [
     '''terraform.tfvars.example'''
 ]
 regexes = [
-    '''taskboard_secure_password''',
+    '''expensepilot_secure_password''',
     '''replace-with-test-value''',
-    '''taskboard:taskboard'''
+    '''expensepilot:expensepilot'''
 ]

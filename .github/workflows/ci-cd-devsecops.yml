@@ -8,8 +8,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/taskboard-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/taskboard-frontend
+  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/expensepilot-backend
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/expensepilot-frontend
 
 jobs:
   # =========================================================================
@@ -195,21 +195,21 @@ jobs:
             else
               echo "$KUBE_CONFIG_DATA" > ~/.kube/config
             fi
-            if kubectl get ns taskboard --request-timeout=5s > /dev/null 2>&1; then
+            if kubectl get ns expensepilot --request-timeout=5s > /dev/null 2>&1; then
               echo "Cluster reachable. Executing Helm rollout..."
-              helm upgrade --install taskboard ./helm/taskboard \
-                --namespace taskboard --create-namespace \
+              helm upgrade --install expensepilot ./helm/expensepilot \
+                --namespace expensepilot --create-namespace \
                 --set backend.image=${{ env.IMAGE_BACKEND }} \
                 --set backend.tag=${{ github.sha }} \
                 --set frontend.image=${{ env.IMAGE_FRONTEND }} \
                 --set frontend.tag=${{ github.sha }}
-              kubectl rollout status deployment/taskboard-backend -n taskboard --timeout=120s
-              kubectl rollout status deployment/taskboard-frontend -n taskboard --timeout=120s
+              kubectl rollout status deployment/expensepilot-backend -n expensepilot --timeout=120s
+              kubectl rollout status deployment/expensepilot-frontend -n expensepilot --timeout=120s
             else
               echo "Kubernetes cluster not directly accessible from GitHub runner. Validating Helm chart templates..."
-              helm lint ./helm/taskboard
-              helm template taskboard ./helm/taskboard \
-                --namespace taskboard \
+              helm lint ./helm/expensepilot
+              helm template expensepilot ./helm/expensepilot \
+                --namespace expensepilot \
                 --set backend.image=${{ env.IMAGE_BACKEND }} \
                 --set backend.tag=${{ github.sha }} \
                 --set frontend.image=${{ env.IMAGE_FRONTEND }} \
@@ -218,9 +218,9 @@ jobs:
             fi
           else
             echo "KUBE_CONFIG_DATA secret not configured. Executing Helm lint & template dry-run validation..."
-            helm lint ./helm/taskboard
-            helm template taskboard ./helm/taskboard \
-              --namespace taskboard \
+            helm lint ./helm/expensepilot
+            helm template expensepilot ./helm/expensepilot \
+              --namespace expensepilot \
               --set backend.image=${{ env.IMAGE_BACKEND }} \
               --set backend.tag=${{ github.sha }} \
               --set frontend.image=${{ env.IMAGE_FRONTEND }} \

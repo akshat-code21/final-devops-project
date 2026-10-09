@@ -2,19 +2,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: scenario5-broken-ingress
-  namespace: taskboard
+  namespace: expensepilot
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
-    - host: taskboard.local
+    - host: expensepilot.local
       http:
         paths:
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: taskboard-backend
+                name: expensepilot-backend
                 port:
                   number: 8080 # Service actually listens on 8000 -> triggers 502 Bad Gateway

@@ -1,20 +1,20 @@
 frontend:
-  image: ghcr.io/akshat-code21/taskboard-frontend
+  image: ghcr.io/akshat-code21/expensepilot-frontend
   tag: latest
 backend:
-  image: ghcr.io/akshat-code21/taskboard-backend
+  image: ghcr.io/akshat-code21/expensepilot-backend
   tag: latest
 replicaCount: 2
-namespace: taskboard
+namespace: expensepilot
 imagePullSecrets: []
 postgres:
-  host: taskboard-postgres
-  database: taskboard
-  username: taskboard
-  password: taskboard
+  host: expensepilot-postgres
+  database: expensepilot
+  username: expensepilot
+  password: expensepilot
 ingress:
   enabled: false
-  host: taskboard.local
+  host: expensepilot.local
 hpa:
   enabled: true
   minReplicas: 2

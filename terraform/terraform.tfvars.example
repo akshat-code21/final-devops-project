@@ -3,5 +3,5 @@
 # WARNING: NEVER commit your actual terraform.tfvars or AWS credentials to version control!
 
 aws_region   = "ap-south-1"
-cluster_name = "taskboard-eks"
+cluster_name = "expensepilot-eks"
 environment  = "dev"

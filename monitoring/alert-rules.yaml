@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: expensepilot-alerts
+  namespace: expensepilot
+  labels:
+    release: prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: expensepilot.rules
+      rules:
+        - alert: ExpensePilotBackendDown
+          expr: up{job="expensepilot-backend-metrics"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "ExpensePilot backend is unreachable"
+            description: "No metrics scraped from ExpensePilot backend for over 1 minute."
+
+        - alert: ExpensePilotHigh5xxErrorRate
+          expr: sum(rate(http_requests_total{status=~"5.."}[2m])) / sum(rate(http_requests_total[2m])) * 100 > 5
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High HTTP 5xx error rate detected"
+            description: "ExpensePilot backend 5xx responses exceed 5% over the last 2 minutes."

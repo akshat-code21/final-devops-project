@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "taskboard.fullname" . }}-backend
+  name: {{ include "expensepilot.fullname" . }}-backend
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels: {app: taskboard-backend}
+    matchLabels: {app: expensepilot-backend}
   template:
     metadata:
-      labels: {app: taskboard-backend}
+      labels: {app: expensepilot-backend}
     spec:
       containers:
         - name: backend

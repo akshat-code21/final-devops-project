@@ -1,7 +1,7 @@
 replicaCount: 1
 ingress:
   enabled: true
-  host: taskboard.local
+  host: expensepilot.local
 hpa:
   enabled: false
 monitoring:

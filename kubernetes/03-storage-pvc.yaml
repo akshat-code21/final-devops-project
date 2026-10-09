@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: taskboard-postgres-pvc
-  namespace: taskboard
+  name: expensepilot-postgres-pvc
+  namespace: expensepilot
 spec:
   accessModes:
     - ReadWriteOnce

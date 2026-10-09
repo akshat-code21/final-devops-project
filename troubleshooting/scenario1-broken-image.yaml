@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scenario1-broken-image
-  namespace: taskboard
+  namespace: expensepilot
   labels:
     troubleshooting: scenario1
 spec:
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/devops-capstone/taskboard-backend:v99.9.9-nonexistent
+          image: ghcr.io/devops-capstone/expensepilot-backend:v99.9.9-nonexistent
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

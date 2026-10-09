@@ -1,1 +1,1 @@
-{{- define "taskboard.fullname" -}}{{ .Release.Name }}-taskboard{{- end }}
+{{- define "expensepilot.fullname" -}}{{ .Release.Name }}-expensepilot{{- end }}

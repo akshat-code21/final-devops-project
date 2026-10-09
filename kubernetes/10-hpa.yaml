@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: taskboard-backend-hpa
-  namespace: taskboard
+  name: expensepilot-backend-hpa
+  namespace: expensepilot
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: taskboard-backend
+    name: expensepilot-backend
   minReplicas: 2
   maxReplicas: 6
   metrics:

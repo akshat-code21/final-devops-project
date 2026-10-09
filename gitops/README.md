@@ -17,7 +17,7 @@ GitOps establishes Git as the **single source of truth** for infrastructure and 
 ```
 
 ## How It Works
-1. When the CI pipeline builds and scans new container images, it generates a commit updating image tags in `helm/taskboard/values.yaml` or declarative manifests.
+1. When the CI pipeline builds and scans new container images, it generates a commit updating image tags in `helm/expensepilot/values.yaml` or declarative manifests.
 2. ArgoCD detects the commit in the Git repository.
 3. ArgoCD compares the desired state in Git against the live cluster state.
 4. If drift occurs (e.g. manual changes, pod crashes, or new version pushed), ArgoCD performs automated self-healing and synchronizes the cluster.

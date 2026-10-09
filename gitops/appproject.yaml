@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: taskboard-project
+  name: expensepilot-project
   namespace: argocd
 spec:
-  description: "GitOps project for TaskBoard Application"
+  description: "GitOps project for ExpensePilot Application"
   sourceRepos:
     - "*"
   destinations:
-    - namespace: taskboard
+    - namespace: expensepilot
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ""

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scenario2-crashloop-db
-  namespace: taskboard
+  namespace: expensepilot
   labels:
     troubleshooting: scenario2
 spec:

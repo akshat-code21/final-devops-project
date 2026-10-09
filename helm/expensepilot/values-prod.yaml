@@ -1,11 +1,11 @@
 frontend:
-  image: ghcr.io/akshat-code21/taskboard-frontend
+  image: ghcr.io/akshat-code21/expensepilot-frontend
 backend:
-  image: ghcr.io/akshat-code21/taskboard-backend
+  image: ghcr.io/akshat-code21/expensepilot-backend
 replicaCount: 2
 ingress:
   enabled: true
-  host: taskboard.local
+  host: expensepilot.local
 hpa:
   enabled: true
 

@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.8.1"
 
-  name = "taskboard-vpc"
+  name = "expensepilot-vpc"
   cidr = "10.20.0.0/16"
 
   azs             = ["ap-south-1a", "ap-south-1b"]
@@ -14,7 +14,7 @@ module "vpc" {
 
   tags = {
     Environment = var.environment
-    Project     = "taskboard"
+    Project     = "expensepilot"
   }
 }
 
@@ -42,6 +42,6 @@ module "eks" {
 
   tags = {
     Environment = var.environment
-    Project     = "taskboard"
+    Project     = "expensepilot"
   }
 }

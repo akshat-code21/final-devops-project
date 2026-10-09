@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: scenario4-unbound-pvc
-  namespace: taskboard
+  namespace: expensepilot
 spec:
   accessModes:
     - ReadWriteOnce
@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scenario4-pending-pod
-  namespace: taskboard
+  namespace: expensepilot
 spec:
   replicas: 1
   selector:

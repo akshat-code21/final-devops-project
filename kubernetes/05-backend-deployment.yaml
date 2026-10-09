@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taskboard-backend
-  namespace: taskboard
+  name: expensepilot-backend
+  namespace: expensepilot
   labels:
-    app: taskboard-backend
+    app: expensepilot-backend
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: taskboard-backend
+      app: expensepilot-backend
   template:
     metadata:
       labels:
-        app: taskboard-backend
+        app: expensepilot-backend
     spec:
       containers:
         - name: backend
-          image: ghcr.io/akshat-code21/taskboard-backend:latest
+          image: ghcr.io/akshat-code21/expensepilot-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -26,17 +26,17 @@ spec:
             - name: APP_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: taskboard-backend-config
+                  name: expensepilot-backend-config
                   key: APP_NAME
             - name: ENVIRONMENT
               valueFrom:
                 configMapKeyRef:
-                  name: taskboard-backend-config
+                  name: expensepilot-backend-config
                   key: ENVIRONMENT
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: taskboard-secrets
+                  name: expensepilot-secrets
                   key: DATABASE_URL
           resources:
             requests:

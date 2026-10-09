@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: taskboard-capstone
+  name: expensepilot-capstone
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,13 +10,13 @@ spec:
   source:
     repoURL: https://github.com/akshat-code21/final-devops-project.git
     targetRevision: HEAD
-    path: helm/taskboard
+    path: helm/expensepilot
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: taskboard
+    namespace: expensepilot
   syncPolicy:
     automated:
       prune: true
