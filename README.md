@@ -30,6 +30,14 @@
 
 ## 1. Project Overview
 
+> **Live proof:** ExpensePilot running locally via `docker compose` — dashboard with Total spend / Pending / Approved / Paid cards.
+
+![ExpensePilot dashboard locally (M1/M4)](screenshots/2_3.png)
+
+> **Live proof:** Same app served through Ingress host `expensepilot.local:8080` on minikube.
+
+![ExpensePilot via Ingress expensepilot.local (M8)](screenshots/8_3.png)
+
 This capstone project delivers a production-grade, secure, cloud-native DevOps lifecycle implementation for **ExpensePilot**—a personal finance expense-tracking application.
 
 Rather than running isolated scripts or ad-hoc containers, the project establishes an automated enterprise software delivery and operations lifecycle:
@@ -206,7 +214,12 @@ pip install -r requirements.txt
 export DATABASE_URL="sqlite:///./test.db"
 
 # 3. Execute Pytest suite
-pytest -v
+rm -f test.db && pytest -v   # M2 gate: green before images
+```
+
+**M2 evidence — 8/8 passed (health, root, create/list/get/update/stats/delete):**
+
+![M2 pytest 8 passed](screenshots/1.png)
 
 # 4. Start backend server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -224,6 +237,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - `DELETE /api/expenses/{id}` — Remove an expense
 - `GET /api/expenses/stats` — Aggregate metrics (total, pending, approved, paid, total_spend)
 
+**M1 evidence — FastAPI auto-docs (`/docs`, `M1 App: http://localhost:8000/docs + curl /health`):**
+
+![M1 FastAPI docs](screenshots/3.png)
+
 ---
 
 ## 5. Docker Setup
@@ -240,9 +257,21 @@ Both application components follow container best practices:
 ### Local Orchestration with Docker Compose
 To boot the full multi-tier stack locally in one command:
 ```bash
-cd docker
-docker compose up --build
+docker compose up --build -d   # M4: single command, boots postgres + backend + frontend
+docker compose ps
 ```
+
+**M4 evidence — backend image build (`python:3.12-slim`, non-root `appuser`):**
+
+![M4 backend build](screenshots/2_1.png)
+
+**M4 evidence — frontend multi-stage build (`node:22-alpine` → `nginx:1.27-alpine`) + 7/7 Started:**
+
+![M4 frontend build + compose up](screenshots/2_2.png)
+
+**M4 evidence — browser `http://localhost:3000` showing ExpensePilot (Total spend / Pending / Approved / Paid):**
+
+![M4 browser local](screenshots/2_3.png)
 Access points:
 - Frontend UI: `http://localhost:3000`
 - Backend API Docs (Swagger): `http://localhost:8000/docs`
@@ -267,6 +296,22 @@ The project provides declarative Kubernetes manifests in `kubernetes/`:
 - `10-hpa.yaml`: Horizontal Pod Autoscaler targeting 60% CPU utilization, scaling backend from 2 to 6 pods.
 
 ### Applying Manifests
+```bash
+kubectl apply -f kubernetes/
+```
+
+**M8 evidence — 5/5 pods Running (2 backend + 2 frontend + 1 postgres):**
+
+![M8 pods Running](screenshots/8_1.png)
+
+**M8 evidence — ClusterIP services + Helm release `expensepilot` rev 3 deployed:**
+
+![M8 svc + helm list](screenshots/8_2.png)
+
+**M8 evidence — app through Ingress host `expensepilot.local:8080` (add `127.0.0.1 expensepilot.local` to /etc/hosts):**
+
+![M8 Ingress browser](screenshots/8_3.png)
+```
 ```bash
 kubectl apply -f kubernetes/00-namespace.yaml
 kubectl apply -f kubernetes/01-configmap.yaml
@@ -357,6 +402,50 @@ terraform init
 terraform validate
 
 # 3. Generate and inspect dry-run execution plan
+terraform plan   # M7: must be non-empty, 56 to add
+```
+
+**M7 evidence — `terraform init` + `validate Success`:**
+
+![M7 init+validate](screenshots/7_1.png)
+
+**M7 evidence — `terraform plan`: data reads + CloudWatch log group `/aws/eks/expensepilot-eks/cluster` to be created:**
+
+![M7 plan reads](screenshots/7_2.png)
+
+**M7 evidence — plan: EC2 tags (`Project=expensepilot`), EKS access entry for `akshatscaler21`, admin policy association:**
+
+![M7 plan access entries](screenshots/7_3.png)
+
+**M7 evidence — plan: IAM policy (`Storage`/`Networking`/ELB) conditioned on `eks:eks-cluster-name`:**
+
+![M7 plan IAM policy](screenshots/7_4.png)
+
+**M7 evidence — plan: cluster IAM role (`expensepilot-eks-cluster-`) + policy attachments:**
+
+![M7 plan cluster role](screenshots/7_5.png)
+
+**M7 evidence — plan summary `56 to add, 0 to change, 0 to destroy`, outputs `cluster_name=expensepilot-eks`:**
+
+![M7 plan summary](screenshots/7_6.png)
+
+**M7 evidence — `terraform apply`: CloudWatch log group + `tls_certificate` read:**
+
+![M7 apply start](screenshots/7_7.png)
+
+**M7 evidence — apply: IAM roles/policies, `vpc-07a5f1d2f899b784e`, VPC route tables/subnets/SGs:**
+
+![M7 apply VPC](screenshots/7_8.png)
+
+**M7 evidence — apply: `aws_eks_cluster Creating...` + `nat-00c29ab12a93fe8a9` complete after 1m44s:**
+
+![M7 apply EKS creating](screenshots/7_9.png)
+
+**M7 evidence — `Apply complete! 56 added`, outputs `cluster_name`, `vpc_id`, `cluster_endpoint (ap-south-1)`:**
+
+![M7 apply complete](screenshots/7_10.png)
+```
+```bash
 terraform plan -out=tfplan
 
 # 4. Provision infrastructure (Cloud deployment)
@@ -405,6 +494,14 @@ The GitHub Actions pipeline (`.github/workflows/ci-cd-devsecops.yml`) runs on ev
 - **Quality Gates:** Unit test failures or SAST/SCA/CVE findings immediately abort the pipeline before images are pushed.
 - **Traceability:** Every container image is tagged with the exact Git commit SHA (`${{ github.sha }}`), enabling instant provenance tracking from running containers back to source code.
 
+**M5 evidence — 20 runs on `main`, latest green (`M5 CI/CD: push → Actions green`):**
+
+![M5 Actions runs green](screenshots/5.png)
+
+**M6 evidence — run #20 green (`M6 Security: Trivy step log in Actions` — backend+frontend Trivy scans ✓, GHCR `:sha` publish, Helm rollout):**
+
+![M6 Trivy gate + GHCR + rollout](screenshots/6.png)
+
 ---
 
 ## 10. DevSecOps Implementation
@@ -437,6 +534,18 @@ Observability is implemented using the industry-standard **Prometheus + Grafana*
 - **Alerting Rules:**
   - `ExpensePilotBackendDown`: Triggers Critical alert if Prometheus fails to scrape backend pods for > 1 minute.
   - `ExpensePilotHigh5xxErrorRate`: Triggers Warning alert if 5xx errors exceed 5% of total traffic.
+
+**M9 evidence — `M9 Observability: curl <backend>/metrics | head` returns Prometheus text:**
+
+![M9 metrics endpoint](screenshots/4_1.png)
+
+**M9 evidence — Prometheus Targets `up`: backend scrape `1` (`M9: Targets UP`):**
+
+![M9 Prometheus Targets UP](screenshots/4_2.png)
+
+**M9 evidence — Grafana live panel (`M9: dashboard with 1 live panel`, backend `up` series):**
+
+![M9 Grafana live panel](screenshots/4_3.png)
 
 ---
 
@@ -494,6 +603,10 @@ To fulfill all requirements in the capstone grading rubric (100 points), prepare
 | **M9** | Grafana Observability Dashboard | Browser at Grafana UI | Live dashboards showing RPS, latency, and CPU usage |
 | **GitOps**| ArgoCD UI Sync Status | Browser at ArgoCD UI | Application status showing `Synced` and `Healthy` |
 | **Lab** | Troubleshooting Verification | Terminal: `kubectl get pods` after fix | Remediated pod returning to `Running` |
+
+**M3 evidence — semantic history (`feat(api): replace Task with Expense model`, `feat(ui): rebuild dashboard as ExpensePilot`, `fix(docker): run frontend as non-root on 8080`, `fix(k8s): envsubst nginx …`, `feat(k8s): enable ingress …`):**
+
+![M3 git log semantic](screenshots/9.png)
 
 ---
 
