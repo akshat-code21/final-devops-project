@@ -1,5 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import {
+  LayoutDashboard,
+  Receipt,
+  Wallet,
+  LineChart,
+  Clock,
+  CircleCheck,
+  BadgeCheck,
+  ArrowRight,
+  Plane,
+  CirclePlus,
+  Rocket,
+  MoreHorizontal,
+  Plus,
+  X,
+} from 'lucide-react';
 import './styles.css';
 
 const API = '/api';
@@ -75,10 +91,10 @@ function App() {
           <div><b>ExpensePilot</b><small>DevOps Capstone</small></div>
         </div>
         <nav>
-          <a className="active">📊 <span>Dashboard</span></a>
-          <a>🧾 <span>My Expenses</span></a>
-          <a>💰 <span>Budgets</span></a>
-          <a>📈 <span>Activity</span></a>
+          <a className="active"><LayoutDashboard size={17} /> <span>Dashboard</span></a>
+          <a><Receipt size={17} /> <span>My Expenses</span></a>
+          <a><Wallet size={17} /> <span>Budgets</span></a>
+          <a><LineChart size={17} /> <span>Activity</span></a>
         </nav>
         <div className="side-bottom">
           <div className="upgrade">
@@ -88,7 +104,7 @@ function App() {
           <div className="profile">
             <div className="avatar">AP</div>
             <div><b>Akshat Sipany</b><small>Finance Admin</small></div>
-            <span>⋯</span>
+            <MoreHorizontal size={16} />
           </div>
         </div>
       </aside>
@@ -99,14 +115,14 @@ function App() {
             <h1>Good morning, Akshat</h1>
             <p className="muted">Here is what your team is spending today.</p>
           </div>
-          <button className="primary" onClick={() => setShowForm(true)}>+ New expense</button>
+          <button className="primary" onClick={() => setShowForm(true)}><Plus size={14} /> New expense</button>
         </header>
         {error && <div className="alert">Backend unavailable. Start the backend and PostgreSQL, then refresh.</div>}
         <section className="stats">
-          <Stat label="Total spend" value={fmt(stats.total_spend)} icon="💰" />
-          <Stat label="Pending" value={stats.pending} icon="⏳" />
-          <Stat label="Approved" value={stats.approved} icon="✅" />
-          <Stat label="Paid" value={stats.paid} icon="✔️" />
+          <Stat label="Total spend" value={fmt(stats.total_spend)} icon={<Wallet size={17} />} />
+          <Stat label="Pending" value={stats.pending} icon={<Clock size={17} />} />
+          <Stat label="Approved" value={stats.approved} icon={<CircleCheck size={17} />} />
+          <Stat label="Paid" value={stats.paid} icon={<BadgeCheck size={17} />} />
         </section>
         <section className="content-grid">
           <div className="panel tasks-panel">
@@ -146,7 +162,7 @@ function App() {
                         <td><span className={`status ${t.status.toLowerCase()}`}>{t.status}</span></td>
                         <td>
                           <button className="icon-btn" onClick={() => advanceStatus(t)} title="Advance status">
-                            →
+                            <ArrowRight size={15} />
                           </button>
                         </td>
                       </tr>
@@ -164,10 +180,10 @@ function App() {
                 <p className="muted">Latest finance events.</p>
               </div>
             </div>
-            <Activity icon="✅" text="AWS bill marked as paid" time="12 min ago" />
-            <Activity icon="✈️" text="Flight to Mumbai approved" time="38 min ago" />
-            <Activity icon="➕" text="New team lunch expense added" time="1 hr ago" />
-            <Activity icon="🚀" text="Deployment pipeline passed" time="2 hrs ago" />
+            <Activity icon={<CircleCheck size={14} />} text="AWS bill marked as paid" time="12 min ago" />
+            <Activity icon={<Plane size={14} />} text="Flight to Mumbai approved" time="38 min ago" />
+            <Activity icon={<CirclePlus size={14} />} text="New team lunch expense added" time="1 hr ago" />
+            <Activity icon={<Rocket size={14} />} text="Deployment pipeline passed" time="2 hrs ago" />
             <div className="pipeline"><span>CI</span><i></i><span>Build</span><i></i><span>Scan</span><i></i><span>Deploy</span></div>
           </aside>
         </section>
@@ -179,7 +195,7 @@ function App() {
                   <p className="eyebrow">LOG EXPENSE</p>
                   <h2>Add a new expense</h2>
                 </div>
-                <button type="button" className="close" onClick={() => setShowForm(false)}>×</button>
+                <button type="button" className="close" onClick={() => setShowForm(false)}><X size={18} /></button>
               </div>
               <label>Expense title<input name="title" required placeholder="e.g. Flight to Mumbai" /></label>
               <label>Notes<textarea name="notes" placeholder="What was this spend for?" /></label>
