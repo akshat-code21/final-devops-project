@@ -1,6 +1,6 @@
 frontend:
   image: ghcr.io/akshat-code21/expensepilot-frontend
-  tag: latest
+  tag: k8s-backend-fix
 backend:
   image: ghcr.io/akshat-code21/expensepilot-backend
   tag: latest
