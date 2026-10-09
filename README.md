@@ -23,8 +23,7 @@
 11. [Monitoring & Observability](#11-monitoring--observability)
 12. [GitOps Workflow](#12-gitops-workflow)
 13. [Troubleshooting Lab](#13-troubleshooting-lab)
-14. [Screenshots Guide & Evidence Checklist](#14-screenshots-guide--evidence-checklist)
-15. [Lessons Learned: What is Required to Do This Assignment Apart from Current Situation](#15-lessons-learned--what-is-required-to-do-this-assignment-apart-from-current-situation)
+14. [Lessons Learned: What is Required to Do This Assignment Apart from Current Situation](#14-lessons-learned--what-is-required-to-do-this-assignment-apart-from-current-situation)
 
 ---
 
@@ -217,7 +216,7 @@ export DATABASE_URL="sqlite:///./test.db"
 rm -f test.db && pytest -v   # M2 gate: green before images
 ```
 
-**M2 evidence — 8/8 passed (health, root, create/list/get/update/stats/delete):**
+**8/8 passed (health, root, create/list/get/update/stats/delete):**
 
 ![M2 pytest 8 passed](screenshots/1.png)
 
@@ -261,15 +260,15 @@ docker compose up --build -d   # M4: single command, boots postgres + backend + 
 docker compose ps
 ```
 
-**M4 evidence — backend image build (`python:3.12-slim`, non-root `appuser`):**
+**Backend image build (`python:3.12-slim`, non-root `appuser`):**
 
 ![M4 backend build](screenshots/2_1.png)
 
-**M4 evidence — frontend multi-stage build (`node:22-alpine` → `nginx:1.27-alpine`) + 7/7 Started:**
+**Frontend multi-stage build (`node:22-alpine` → `nginx:1.27-alpine`) + 7/7 Started:**
 
 ![M4 frontend build + compose up](screenshots/2_2.png)
 
-**M4 evidence — browser `http://localhost:3000` showing ExpensePilot (Total spend / Pending / Approved / Paid):**
+**Browser `http://localhost:3000` showing ExpensePilot (Total spend / Pending / Approved / Paid):**
 
 ![M4 browser local](screenshots/2_3.png)
 Access points:
@@ -300,18 +299,17 @@ The project provides declarative Kubernetes manifests in `kubernetes/`:
 kubectl apply -f kubernetes/
 ```
 
-**M8 evidence — 5/5 pods Running (2 backend + 2 frontend + 1 postgres):**
+**5/5 pods Running (2 backend + 2 frontend + 1 postgres):**
 
 ![M8 pods Running](screenshots/8_1.png)
 
-**M8 evidence — ClusterIP services + Helm release `expensepilot` rev 3 deployed:**
+**ClusterIP services + Helm release `expensepilot` rev 3 deployed:**
 
 ![M8 svc + helm list](screenshots/8_2.png)
 
-**M8 evidence — app through Ingress host `expensepilot.local:8080` (add `127.0.0.1 expensepilot.local` to /etc/hosts):**
+**App through Ingress host `expensepilot.local:8080` (add `127.0.0.1 expensepilot.local` to /etc/hosts):**
 
 ![M8 Ingress browser](screenshots/8_3.png)
-```
 ```bash
 kubectl apply -f kubernetes/00-namespace.yaml
 kubectl apply -f kubernetes/01-configmap.yaml
@@ -405,46 +403,45 @@ terraform validate
 terraform plan   # M7: must be non-empty, 56 to add
 ```
 
-**M7 evidence — `terraform init` + `validate Success`:**
+**`terraform init` + `validate Success`:**
 
 ![M7 init+validate](screenshots/7_1.png)
 
-**M7 evidence — `terraform plan`: data reads + CloudWatch log group `/aws/eks/expensepilot-eks/cluster` to be created:**
+**`terraform plan`: data reads + CloudWatch log group `/aws/eks/expensepilot-eks/cluster` to be created:**
 
 ![M7 plan reads](screenshots/7_2.png)
 
-**M7 evidence — plan: EC2 tags (`Project=expensepilot`), EKS access entry for `akshatscaler21`, admin policy association:**
+**EC2 tags (`Project=expensepilot`), EKS access entry for `akshatscaler21`, admin policy association:**
 
 ![M7 plan access entries](screenshots/7_3.png)
 
-**M7 evidence — plan: IAM policy (`Storage`/`Networking`/ELB) conditioned on `eks:eks-cluster-name`:**
+**IAM policy (`Storage`/`Networking`/ELB) conditioned on `eks:eks-cluster-name`:**
 
 ![M7 plan IAM policy](screenshots/7_4.png)
 
-**M7 evidence — plan: cluster IAM role (`expensepilot-eks-cluster-`) + policy attachments:**
+**Cluster IAM role (`expensepilot-eks-cluster-`) + policy attachments:**
 
 ![M7 plan cluster role](screenshots/7_5.png)
 
-**M7 evidence — plan summary `56 to add, 0 to change, 0 to destroy`, outputs `cluster_name=expensepilot-eks`:**
+**`56 to add, 0 to change, 0 to destroy`, outputs `cluster_name=expensepilot-eks`:**
 
 ![M7 plan summary](screenshots/7_6.png)
 
-**M7 evidence — `terraform apply`: CloudWatch log group + `tls_certificate` read:**
+**`terraform apply`: CloudWatch log group + `tls_certificate` read:**
 
 ![M7 apply start](screenshots/7_7.png)
 
-**M7 evidence — apply: IAM roles/policies, `vpc-07a5f1d2f899b784e`, VPC route tables/subnets/SGs:**
+**IAM roles/policies, `vpc-07a5f1d2f899b784e`, VPC route tables/subnets/SGs:**
 
 ![M7 apply VPC](screenshots/7_8.png)
 
-**M7 evidence — apply: `aws_eks_cluster Creating...` + `nat-00c29ab12a93fe8a9` complete after 1m44s:**
+**`aws_eks_cluster Creating...` + `nat-00c29ab12a93fe8a9` complete after 1m44s:**
 
 ![M7 apply EKS creating](screenshots/7_9.png)
 
-**M7 evidence — `Apply complete! 56 added`, outputs `cluster_name`, `vpc_id`, `cluster_endpoint (ap-south-1)`:**
+**`Apply complete! 56 added`, outputs `cluster_name`, `vpc_id`, `cluster_endpoint (ap-south-1)`:**
 
 ![M7 apply complete](screenshots/7_10.png)
-```
 ```bash
 terraform plan -out=tfplan
 
@@ -494,11 +491,11 @@ The GitHub Actions pipeline (`.github/workflows/ci-cd-devsecops.yml`) runs on ev
 - **Quality Gates:** Unit test failures or SAST/SCA/CVE findings immediately abort the pipeline before images are pushed.
 - **Traceability:** Every container image is tagged with the exact Git commit SHA (`${{ github.sha }}`), enabling instant provenance tracking from running containers back to source code.
 
-**M5 evidence — 20 runs on `main`, latest green (`M5 CI/CD: push → Actions green`):**
+**Github Actions Test**
 
 ![M5 Actions runs green](screenshots/5.png)
 
-**M6 evidence — run #20 green (`M6 Security: Trivy step log in Actions` — backend+frontend Trivy scans ✓, GHCR `:sha` publish, Helm rollout):**
+**Backend + Frontend Trivy scans ✓, GHCR `:sha` publish, Helm rollout):**
 
 ![M6 Trivy gate + GHCR + rollout](screenshots/6.png)
 
@@ -535,15 +532,15 @@ Observability is implemented using the industry-standard **Prometheus + Grafana*
   - `ExpensePilotBackendDown`: Triggers Critical alert if Prometheus fails to scrape backend pods for > 1 minute.
   - `ExpensePilotHigh5xxErrorRate`: Triggers Warning alert if 5xx errors exceed 5% of total traffic.
 
-**M9 evidence — `M9 Observability: curl <backend>/metrics | head` returns Prometheus text:**
+**`Observability: curl <backend>/metrics | head` returns Prometheus text:**
 
 ![M9 metrics endpoint](screenshots/4_1.png)
 
-**M9 evidence — Prometheus Targets `up`: backend scrape `1` (`M9: Targets UP`):**
+**Prometheus Targets `up`: backend scrape `1` (`Targets UP`):**
 
 ![M9 Prometheus Targets UP](screenshots/4_2.png)
 
-**M9 evidence — Grafana live panel (`M9: dashboard with 1 live panel`, backend `up` series):**
+**Grafana live panel (`dashboard with 1 live panel`, backend `up` series):**
 
 ![M9 Grafana live panel](screenshots/4_3.png)
 
@@ -556,6 +553,10 @@ The GitOps implementation utilizes **ArgoCD** to follow the pull-based continuou
 - ArgoCD continuously monitors `helm/expensepilot` in the Git repository.
 - When an engineer merges code or the CI pipeline updates image tags in Git, ArgoCD automatically pulls the new manifest and reconciles the cluster state.
 - **Self-Healing & Drift Detection:** If an operator manually alters a resource or deletes a pod with `kubectl`, ArgoCD automatically overwrites the drift and restores the desired state declared in Git.
+
+**ArgoCD application `expensepilot-capstone`: Healthy, Synced to `HEAD`, and synchronized successfully:**
+
+![ArgoCD application Healthy and Synced](screenshots/argocd.png)
 
 ---
 
@@ -579,38 +580,27 @@ Incident 5: Ingress 502 Bad Gateway (Port mismatch between Ingress & Service)
 5. **Verify the Solution:** Validate pods reach `Running (1/1)` and HTTP endpoints return `200 OK`.
 6. **Document the Post-Mortem:** Record root cause, impact, remediation, and prevention measures.
 
+### Troubleshooting Evidence
+
+**Initial failure: the deliberately broken image produces `ErrImagePull`:**
+
+![Troubleshooting scenario 1 showing ErrImagePull](screenshots/troubleshooting_1.png)
+
+**Diagnosis: `kubectl describe pod` shows the nonexistent image tag and pull failure events:**
+
+![Troubleshooting scenario 1 image pull diagnosis](screenshots/troubleshooting_2.png)
+
+**Remediation: the deployment image is updated and Kubernetes begins replacing the failed pod:**
+
+![Troubleshooting scenario 1 remediation](screenshots/troubleshooting_3.png)
+
 ---
 
-## 14. Screenshots Guide & Evidence Checklist
+## 14. Lessons Learned: What is Required to Do This Assignment Apart from Current Situation
 
-To fulfill all requirements in the capstone grading rubric (100 points), prepare the following evidence screenshots:
-
-| Module | Required Evidence Screenshot | Command / View | Expected Result |
-| :--- | :--- | :--- | :--- |
-| **M1** | Running Application in Browser | Browser at `http://localhost:3000` | ExpensePilot UI loaded with expense list, spend totals & stats |
-| **M2** | Automated Testing | Terminal: `pytest -v` | 8/8 tests passing in green |
-| **M3** | Git Version Control | Terminal: `git log --oneline -n 10` | 10+ clean semantic commits |
-| **M4** | Docker Compose Stack | Terminal: `docker compose ps` | postgres, backend, frontend all `Up (healthy)` |
-| **M5** | GitHub Actions CI/CD Pipeline | GitHub Actions Run Page | All 5 pipeline stages showing green checkmarks |
-| **M5** | GHCR Container Registry | GitHub Packages / GHCR UI | Images published with SHA tags (not `latest`) |
-| **M6** | Trivy Security Scan Output | GitHub Actions Trivy step log | Table showing 0 HIGH/CRITICAL vulnerabilities |
-| **M7** | Terraform Plan Output | Terminal: `terraform plan` | Plan: X to add, 0 to change, 0 to destroy |
-| **M7** | AWS EKS Console / Teardown | AWS Console / `terraform destroy` | EKS Cluster active / clean teardown screenshot |
-| **M8** | Kubernetes Running Pods | Terminal: `kubectl get pods -n expensepilot` | All pods in `Running` state (2 frontend, 2 backend, 1 db) |
-| **M8** | Kubernetes Services & Ingress | Terminal: `kubectl get svc,ingress,hpa -n expensepilot` | ClusterIPs bound, Ingress host active, HPA active |
-| **M8** | Helm Release | Terminal: `helm list -n expensepilot` | Release `expensepilot` in `deployed` status |
-| **M9** | Backend Metrics Endpoint | Terminal: `curl http://<backend>/metrics` | Prometheus metrics with `http_requests_total` |
-| **M9** | Grafana Observability Dashboard | Browser at Grafana UI | Live dashboards showing RPS, latency, and CPU usage |
-| **GitOps**| ArgoCD UI Sync Status | Browser at ArgoCD UI | Application status showing `Synced` and `Healthy` |
-| **Lab** | Troubleshooting Verification | Terminal: `kubectl get pods` after fix | Remediated pod returning to `Running` |
-
-**M3 evidence — semantic history (`feat(api): replace Task with Expense model`, `feat(ui): rebuild dashboard as ExpensePilot`, `fix(docker): run frontend as non-root on 8080`, `fix(k8s): envsubst nginx …`, `feat(k8s): enable ingress …`):**
+**Semantic history (`feat(api): replace Task with Expense model`, `feat(ui): rebuild dashboard as ExpensePilot`, `fix(docker): run frontend as non-root on 8080`, `fix(k8s): envsubst nginx …`, `feat(k8s): enable ingress …`):**
 
 ![M3 git log semantic](screenshots/9.png)
-
----
-
-## 15. Lessons Learned: What is Required to Do This Assignment Apart from Current Situation
 
 ### Gap Analysis: What Was Missing vs What Was Delivered
 1. **Directory Structure:** The initial repository had disparate folders (`backend/`, `frontend/`, `k8s/`). We established the unified `final-devops-project/` tree containing all required folders (`application/`, `docker/`, `kubernetes/`, `helm/`, `terraform/`, `.github/`, `security/`, `monitoring/`, `gitops/`, `troubleshooting/`).
