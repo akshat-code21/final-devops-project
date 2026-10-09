@@ -1,6 +1,6 @@
 frontend:
   image: ghcr.io/akshat-code21/expensepilot-frontend
-  tag: k8s-backend-fix
+  tag: local-ui-update
 backend:
   image: ghcr.io/akshat-code21/expensepilot-backend
   tag: latest
@@ -26,4 +26,3 @@ resources:
 monitoring:
   serviceMonitor:
     enabled: false
-

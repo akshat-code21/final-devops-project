@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/akshat-code21/expensepilot-frontend:latest
+          image: ghcr.io/akshat-code21/expensepilot-frontend:local-ui-update
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
