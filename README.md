@@ -442,6 +442,59 @@ terraform plan   # M7: must be non-empty, 56 to add
 **`Apply complete! 56 added`, outputs `cluster_name`, `vpc_id`, `cluster_endpoint (ap-south-1)`:**
 
 ![M7 apply complete](screenshots/7_10.png)
+
+**AWS Console, EKS in Asia Pacific (Mumbai): cluster `expensepilot-eks` is `Active` on Kubernetes `1.31`:**
+
+![M7 AWS Console EKS cluster Active](screenshots/7_11_eks_console.png)
+
+### Teardown: `terraform destroy`
+
+All 56 resources are torn down after evaluation so the account does not keep billing for EKS and the NAT gateway.
+
+**Second `apply` run: `56 added`, outputs `cluster_name=expensepilot-eks`, `vpc_id=vpc-05ff6c92326a92841`, then `terraform destroy` starts refreshing state:**
+
+![M7 destroy 1](screenshots/7_destroy_1.png)
+
+**Destroy refresh: VPC subnets (2 public, 2 private), route tables, IGW, NAT gateway, EIP and node security group rules:**
+
+![M7 destroy 2](screenshots/7_destroy_2.png)
+
+**Destroy refresh: node group IAM attachments, KMS key, EKS cluster, access entry and OIDC provider:**
+
+![M7 destroy 3](screenshots/7_destroy_3.png)
+
+**Destroy plan: CloudWatch log group and cluster security group tags marked for destruction:**
+
+![M7 destroy 4](screenshots/7_destroy_4.png)
+
+**Destroy plan: EKS access policy association and `aws_eks_cluster` (`expensepilot-eks`) marked for destruction:**
+
+![M7 destroy 5](screenshots/7_destroy_5.png)
+
+**Destroy plan: cluster `ACTIVE`, version `1.31`, ap-south-1 endpoint, all to `null`:**
+
+![M7 destroy 6](screenshots/7_destroy_6.png)
+
+**Destroy plan: cluster `vpc_config` (private subnets + `vpc-05ff6c92326a92841`):**
+
+![M7 destroy 7](screenshots/7_destroy_7.png)
+
+**Destroy plan: OIDC provider and cluster encryption IAM policy:**
+
+![M7 destroy 8](screenshots/7_destroy_8.png)
+
+**Destroy plan: custom IAM policy scoped to `eks-cluster-name`:**
+
+![M7 destroy 9](screenshots/7_destroy_9.png)
+
+**`Plan: 0 to add, 0 to change, 56 to destroy`, confirmed with `yes`, resources begin `Destroying...`:**
+
+![M7 destroy 10](screenshots/7_destroy_10.png)
+
+**`Destroy complete! Resources: 56 destroyed.`: subnets, security groups, KMS key and finally `vpc-05ff6c92326a92841` removed, nothing left running on AWS:**
+
+![M7 destroy complete](screenshots/7_destroy_11.png)
+
 ```bash
 terraform plan -out=tfplan
 
@@ -498,6 +551,10 @@ The GitHub Actions pipeline (`.github/workflows/ci-cd-devsecops.yml`) runs on ev
 **Backend + Frontend Trivy scans ✓, GHCR `:sha` publish, Helm rollout):**
 
 ![M6 Trivy gate + GHCR + rollout](screenshots/6.png)
+
+**GHCR package page: `expensepilot-backend` published with commit SHA tags (`32da79f...`, `a1aaffa...`, `b57e26e...`), pullable as `ghcr.io/akshat-code21/expensepilot-backend:<sha>`:**
+
+![M5 GHCR package with SHA tags](screenshots/ghcr.png)
 
 ---
 
