@@ -447,6 +447,10 @@ terraform plan   # M7: must be non-empty, 56 to add
 
 ![M7 AWS Console EKS cluster Active](screenshots/7_11_eks_console.png)
 
+**AWS Console, VPC in Asia Pacific (Mumbai): `expensepilot-vpc` is `Available` with CIDR `10.20.0.0/16`, matching `terraform/main.tf`:**
+
+![M7 AWS Console expensepilot-vpc](screenshots/7_12_vpc_console.png)
+
 ### Teardown: `terraform destroy`
 
 All 56 resources are torn down after evaluation so the account does not keep billing for EKS and the NAT gateway.
