@@ -7,7 +7,6 @@
 ![Observability](https://img.shields.io/badge/Monitoring-Prometheus%20%26%20Grafana-orange?logo=prometheus)
 ![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-green?logo=argo)
 
-
 ---
 
 ## Table of Contents
