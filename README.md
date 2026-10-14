@@ -7,6 +7,14 @@
 ![Observability](https://img.shields.io/badge/Monitoring-Prometheus%20%26%20Grafana-orange?logo=prometheus)
 ![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-green?logo=argo)
 
+### Demo video
+
+[![Watch the demo on Loom](https://img.shields.io/badge/Demo-Watch%20on%20Loom-625DF5?logo=loom&logoColor=white)](https://www.loom.com/share/5ead77075a554522a936726b0f37d14a)
+
+Recorded walkthrough of the full flow (commit, pipeline, deployment update): **[https://www.loom.com/share/5ead77075a554522a936726b0f37d14a](https://www.loom.com/share/5ead77075a554522a936726b0f37d14a)**
+
+Presentation deck: [`ExpensePilot_DevOps_Capstone.pptx`](ExpensePilot_DevOps_Capstone.pptx)
+
 ---
 
 ## Table of Contents
